@@ -24,6 +24,7 @@ import { Route as AppAdminDashboardRouteImport } from './routes/_app.admin.dashb
 import { Route as AppAdminCoursesRouteImport } from './routes/_app.admin.courses'
 import { Route as AppAdminAdsRouteImport } from './routes/_app.admin.ads'
 import { Route as AppAdminAdmissionRouteImport } from './routes/_app.admin.admission'
+import { Route as AppAccountantPaymentsRouteImport } from './routes/_app.accountant.payments'
 import { Route as AppAccountantDashboardRouteImport } from './routes/_app.accountant.dashboard'
 import { Route as AppAccountantAdmissionRouteImport } from './routes/_app.accountant.admission'
 
@@ -101,6 +102,11 @@ const AppAdminAdmissionRoute = AppAdminAdmissionRouteImport.update({
   path: '/admin/admission',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAccountantPaymentsRoute = AppAccountantPaymentsRouteImport.update({
+  id: '/accountant/payments',
+  path: '/accountant/payments',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAccountantDashboardRoute = AppAccountantDashboardRouteImport.update({
   id: '/accountant/dashboard',
   path: '/accountant/dashboard',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accountant/admission': typeof AppAccountantAdmissionRoute
   '/accountant/dashboard': typeof AppAccountantDashboardRoute
+  '/accountant/payments': typeof AppAccountantPaymentsRoute
   '/admin/admission': typeof AppAdminAdmissionRoute
   '/admin/ads': typeof AppAdminAdsRoute
   '/admin/courses': typeof AppAdminCoursesRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accountant/admission': typeof AppAccountantAdmissionRoute
   '/accountant/dashboard': typeof AppAccountantDashboardRoute
+  '/accountant/payments': typeof AppAccountantPaymentsRoute
   '/admin/admission': typeof AppAdminAdmissionRoute
   '/admin/ads': typeof AppAdminAdsRoute
   '/admin/courses': typeof AppAdminCoursesRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/accountant/admission': typeof AppAccountantAdmissionRoute
   '/_app/accountant/dashboard': typeof AppAccountantDashboardRoute
+  '/_app/accountant/payments': typeof AppAccountantPaymentsRoute
   '/_app/admin/admission': typeof AppAdminAdmissionRoute
   '/_app/admin/ads': typeof AppAdminAdsRoute
   '/_app/admin/courses': typeof AppAdminCoursesRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/'
     | '/accountant/admission'
     | '/accountant/dashboard'
+    | '/accountant/payments'
     | '/admin/admission'
     | '/admin/ads'
     | '/admin/courses'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/'
     | '/accountant/admission'
     | '/accountant/dashboard'
+    | '/accountant/payments'
     | '/admin/admission'
     | '/admin/ads'
     | '/admin/courses'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_app/accountant/admission'
     | '/_app/accountant/dashboard'
+    | '/_app/accountant/payments'
     | '/_app/admin/admission'
     | '/_app/admin/ads'
     | '/_app/admin/courses'
@@ -338,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAdmissionRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/accountant/payments': {
+      id: '/_app/accountant/payments'
+      path: '/accountant/payments'
+      fullPath: '/accountant/payments'
+      preLoaderRoute: typeof AppAccountantPaymentsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/accountant/dashboard': {
       id: '/_app/accountant/dashboard'
       path: '/accountant/dashboard'
@@ -358,6 +377,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAccountantAdmissionRoute: typeof AppAccountantAdmissionRoute
   AppAccountantDashboardRoute: typeof AppAccountantDashboardRoute
+  AppAccountantPaymentsRoute: typeof AppAccountantPaymentsRoute
   AppAdminAdmissionRoute: typeof AppAdminAdmissionRoute
   AppAdminAdsRoute: typeof AppAdminAdsRoute
   AppAdminCoursesRoute: typeof AppAdminCoursesRoute
@@ -376,6 +396,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAccountantAdmissionRoute: AppAccountantAdmissionRoute,
   AppAccountantDashboardRoute: AppAccountantDashboardRoute,
+  AppAccountantPaymentsRoute: AppAccountantPaymentsRoute,
   AppAdminAdmissionRoute: AppAdminAdmissionRoute,
   AppAdminAdsRoute: AppAdminAdsRoute,
   AppAdminCoursesRoute: AppAdminCoursesRoute,
