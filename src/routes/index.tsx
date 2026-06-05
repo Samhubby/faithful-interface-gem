@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROLE_HOME, setSession, type Role } from "@/lib/session";
+import { ROLE_HOME, setSession } from "@/lib/session";
+import { store } from "@/lib/store";
+import { loginSchema } from "@/lib/schemas";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,13 +19,6 @@ export const Route = createFileRoute("/")({
   component: LoginPage,
 });
 
-// Demo accounts — replace with real auth later.
-const ACCOUNTS: Record<string, { password: string; role: Role; displayName: string }> = {
-  admin: { password: "admin", role: "admin", displayName: "Administrator" },
-  muktinath: { password: "muktinath", role: "counsellor", displayName: "Muktinath Poudel" },
-  dikshyant: { password: "dikshyant", role: "caller", displayName: "Dikshyant Ghising" },
-};
-
 function LoginPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -33,23 +28,33 @@ function LoginPage() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+    const parsed = loginSchema.safeParse({ username, password });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
     setLoading(true);
-    const acc = ACCOUNTS[username.trim().toLowerCase()];
     setTimeout(() => {
       setLoading(false);
-      if (!acc || acc.password !== password) {
+      const u = store
+        .listUsers()
+        .find((x) => x.username.toLowerCase() === username.trim().toLowerCase());
+      if (!u || u.password !== password) {
         toast.error("Invalid credentials");
         return;
       }
-      setSession({ username, displayName: acc.displayName, role: acc.role });
-      toast.success(`Welcome, ${acc.displayName}`);
-      navigate({ to: ROLE_HOME[acc.role] });
-    }, 350);
+      setSession({
+        username: u.username,
+        displayName: `${u.firstName} ${u.lastName}`.trim(),
+        role: u.role,
+      });
+      toast.success(`Welcome, ${u.firstName}`);
+      navigate({ to: ROLE_HOME[u.role] });
+    }, 250);
   }
 
   return (
     <main className="min-h-screen grid lg:grid-cols-2 bg-background">
-      {/* Left — brand panel */}
       <section className="relative hidden lg:flex flex-col justify-between p-12 overflow-hidden bg-deep">
         <div
           aria-hidden
@@ -84,7 +89,6 @@ function LoginPage() {
         </div>
       </section>
 
-      {/* Right — login card */}
       <section className="flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md rounded-2xl border border-border bg-card/60 backdrop-blur p-8 shadow-2xl">
           <header className="mb-6">
@@ -144,9 +148,9 @@ function LoginPage() {
             Presidential Graduate School · Internal Network
           </div>
 
-          <div className="mt-6 rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground">
-            <div className="mb-1 font-semibold text-foreground">Demo accounts</div>
-            admin / admin · muktinath / muktinath · dikshyant / dikshyant
+          <div className="mt-6 rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground space-y-1">
+            <div className="font-semibold text-foreground">Demo accounts</div>
+            <div>admin / admin · muktinath / muktinath · dikshyant / dikshyant · bishnu / bishnu</div>
           </div>
         </div>
       </section>

@@ -9,6 +9,7 @@ import {
   GraduationCap,
   BarChart3,
   LogOut,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -24,7 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { clearSession, getSession, type Role, type Session } from "@/lib/session";
+import { clearSession, getSession, ROLE_LABEL, type Role, type Session } from "@/lib/session";
 
 type Item = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -45,10 +46,11 @@ const NAV: Record<Role, Item[]> = {
     { title: "Follow Up", url: "/counsellor/follow-up", icon: PhoneCall },
     { title: "Admission", url: "/counsellor/admission", icon: GraduationCap },
   ],
-  caller: [
-    { title: "Dashboard", url: "/caller/dashboard", icon: LayoutDashboard },
-    { title: "Leads", url: "/caller/leads", icon: UserPlus },
-    { title: "Follow Up", url: "/caller/follow-up", icon: PhoneCall },
+  caller: [{ title: "Follow Up", url: "/caller/follow-up", icon: PhoneCall }],
+  accountant: [
+    { title: "Dashboard", url: "/accountant/dashboard", icon: LayoutDashboard },
+    { title: "Admission", url: "/accountant/admission", icon: GraduationCap },
+    { title: "Payments", url: "/accountant/payments", icon: Wallet },
   ],
 };
 
@@ -75,7 +77,7 @@ export function AppSidebar({ session }: { session: Session }) {
             <div className="leading-tight">
               <div className="font-display text-sm font-semibold">PGS · LMS</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                {session.role}
+                {ROLE_LABEL[session.role]}
               </div>
             </div>
           )}

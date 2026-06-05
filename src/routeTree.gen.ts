@@ -15,9 +15,7 @@ import { Route as AppCounsellorLeadsRouteImport } from './routes/_app.counsellor
 import { Route as AppCounsellorFollowUpRouteImport } from './routes/_app.counsellor.follow-up'
 import { Route as AppCounsellorDashboardRouteImport } from './routes/_app.counsellor.dashboard'
 import { Route as AppCounsellorAdmissionRouteImport } from './routes/_app.counsellor.admission'
-import { Route as AppCallerLeadsRouteImport } from './routes/_app.caller.leads'
 import { Route as AppCallerFollowUpRouteImport } from './routes/_app.caller.follow-up'
-import { Route as AppCallerDashboardRouteImport } from './routes/_app.caller.dashboard'
 import { Route as AppAdminUsersRouteImport } from './routes/_app.admin.users'
 import { Route as AppAdminReportsRouteImport } from './routes/_app.admin.reports'
 import { Route as AppAdminLeadsRouteImport } from './routes/_app.admin.leads'
@@ -26,6 +24,9 @@ import { Route as AppAdminDashboardRouteImport } from './routes/_app.admin.dashb
 import { Route as AppAdminCoursesRouteImport } from './routes/_app.admin.courses'
 import { Route as AppAdminAdsRouteImport } from './routes/_app.admin.ads'
 import { Route as AppAdminAdmissionRouteImport } from './routes/_app.admin.admission'
+import { Route as AppAccountantPaymentsRouteImport } from './routes/_app.accountant.payments'
+import { Route as AppAccountantDashboardRouteImport } from './routes/_app.accountant.dashboard'
+import { Route as AppAccountantAdmissionRouteImport } from './routes/_app.accountant.admission'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -56,19 +57,9 @@ const AppCounsellorAdmissionRoute = AppCounsellorAdmissionRouteImport.update({
   path: '/counsellor/admission',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCallerLeadsRoute = AppCallerLeadsRouteImport.update({
-  id: '/caller/leads',
-  path: '/caller/leads',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppCallerFollowUpRoute = AppCallerFollowUpRouteImport.update({
   id: '/caller/follow-up',
   path: '/caller/follow-up',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCallerDashboardRoute = AppCallerDashboardRouteImport.update({
-  id: '/caller/dashboard',
-  path: '/caller/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminUsersRoute = AppAdminUsersRouteImport.update({
@@ -111,9 +102,27 @@ const AppAdminAdmissionRoute = AppAdminAdmissionRouteImport.update({
   path: '/admin/admission',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAccountantPaymentsRoute = AppAccountantPaymentsRouteImport.update({
+  id: '/accountant/payments',
+  path: '/accountant/payments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountantDashboardRoute = AppAccountantDashboardRouteImport.update({
+  id: '/accountant/dashboard',
+  path: '/accountant/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountantAdmissionRoute = AppAccountantAdmissionRouteImport.update({
+  id: '/accountant/admission',
+  path: '/accountant/admission',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/accountant/admission': typeof AppAccountantAdmissionRoute
+  '/accountant/dashboard': typeof AppAccountantDashboardRoute
+  '/accountant/payments': typeof AppAccountantPaymentsRoute
   '/admin/admission': typeof AppAdminAdmissionRoute
   '/admin/ads': typeof AppAdminAdsRoute
   '/admin/courses': typeof AppAdminCoursesRoute
@@ -122,9 +131,7 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AppAdminLeadsRoute
   '/admin/reports': typeof AppAdminReportsRoute
   '/admin/users': typeof AppAdminUsersRoute
-  '/caller/dashboard': typeof AppCallerDashboardRoute
   '/caller/follow-up': typeof AppCallerFollowUpRoute
-  '/caller/leads': typeof AppCallerLeadsRoute
   '/counsellor/admission': typeof AppCounsellorAdmissionRoute
   '/counsellor/dashboard': typeof AppCounsellorDashboardRoute
   '/counsellor/follow-up': typeof AppCounsellorFollowUpRoute
@@ -132,6 +139,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/accountant/admission': typeof AppAccountantAdmissionRoute
+  '/accountant/dashboard': typeof AppAccountantDashboardRoute
+  '/accountant/payments': typeof AppAccountantPaymentsRoute
   '/admin/admission': typeof AppAdminAdmissionRoute
   '/admin/ads': typeof AppAdminAdsRoute
   '/admin/courses': typeof AppAdminCoursesRoute
@@ -140,9 +150,7 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AppAdminLeadsRoute
   '/admin/reports': typeof AppAdminReportsRoute
   '/admin/users': typeof AppAdminUsersRoute
-  '/caller/dashboard': typeof AppCallerDashboardRoute
   '/caller/follow-up': typeof AppCallerFollowUpRoute
-  '/caller/leads': typeof AppCallerLeadsRoute
   '/counsellor/admission': typeof AppCounsellorAdmissionRoute
   '/counsellor/dashboard': typeof AppCounsellorDashboardRoute
   '/counsellor/follow-up': typeof AppCounsellorFollowUpRoute
@@ -152,6 +160,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/accountant/admission': typeof AppAccountantAdmissionRoute
+  '/_app/accountant/dashboard': typeof AppAccountantDashboardRoute
+  '/_app/accountant/payments': typeof AppAccountantPaymentsRoute
   '/_app/admin/admission': typeof AppAdminAdmissionRoute
   '/_app/admin/ads': typeof AppAdminAdsRoute
   '/_app/admin/courses': typeof AppAdminCoursesRoute
@@ -160,9 +171,7 @@ export interface FileRoutesById {
   '/_app/admin/leads': typeof AppAdminLeadsRoute
   '/_app/admin/reports': typeof AppAdminReportsRoute
   '/_app/admin/users': typeof AppAdminUsersRoute
-  '/_app/caller/dashboard': typeof AppCallerDashboardRoute
   '/_app/caller/follow-up': typeof AppCallerFollowUpRoute
-  '/_app/caller/leads': typeof AppCallerLeadsRoute
   '/_app/counsellor/admission': typeof AppCounsellorAdmissionRoute
   '/_app/counsellor/dashboard': typeof AppCounsellorDashboardRoute
   '/_app/counsellor/follow-up': typeof AppCounsellorFollowUpRoute
@@ -172,6 +181,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/accountant/admission'
+    | '/accountant/dashboard'
+    | '/accountant/payments'
     | '/admin/admission'
     | '/admin/ads'
     | '/admin/courses'
@@ -180,9 +192,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/reports'
     | '/admin/users'
-    | '/caller/dashboard'
     | '/caller/follow-up'
-    | '/caller/leads'
     | '/counsellor/admission'
     | '/counsellor/dashboard'
     | '/counsellor/follow-up'
@@ -190,6 +200,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/accountant/admission'
+    | '/accountant/dashboard'
+    | '/accountant/payments'
     | '/admin/admission'
     | '/admin/ads'
     | '/admin/courses'
@@ -198,9 +211,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/reports'
     | '/admin/users'
-    | '/caller/dashboard'
     | '/caller/follow-up'
-    | '/caller/leads'
     | '/counsellor/admission'
     | '/counsellor/dashboard'
     | '/counsellor/follow-up'
@@ -209,6 +220,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/accountant/admission'
+    | '/_app/accountant/dashboard'
+    | '/_app/accountant/payments'
     | '/_app/admin/admission'
     | '/_app/admin/ads'
     | '/_app/admin/courses'
@@ -217,9 +231,7 @@ export interface FileRouteTypes {
     | '/_app/admin/leads'
     | '/_app/admin/reports'
     | '/_app/admin/users'
-    | '/_app/caller/dashboard'
     | '/_app/caller/follow-up'
-    | '/_app/caller/leads'
     | '/_app/counsellor/admission'
     | '/_app/counsellor/dashboard'
     | '/_app/counsellor/follow-up'
@@ -275,25 +287,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCounsellorAdmissionRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/caller/leads': {
-      id: '/_app/caller/leads'
-      path: '/caller/leads'
-      fullPath: '/caller/leads'
-      preLoaderRoute: typeof AppCallerLeadsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/caller/follow-up': {
       id: '/_app/caller/follow-up'
       path: '/caller/follow-up'
       fullPath: '/caller/follow-up'
       preLoaderRoute: typeof AppCallerFollowUpRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/caller/dashboard': {
-      id: '/_app/caller/dashboard'
-      path: '/caller/dashboard'
-      fullPath: '/caller/dashboard'
-      preLoaderRoute: typeof AppCallerDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/users': {
@@ -352,10 +350,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAdmissionRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/accountant/payments': {
+      id: '/_app/accountant/payments'
+      path: '/accountant/payments'
+      fullPath: '/accountant/payments'
+      preLoaderRoute: typeof AppAccountantPaymentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/accountant/dashboard': {
+      id: '/_app/accountant/dashboard'
+      path: '/accountant/dashboard'
+      fullPath: '/accountant/dashboard'
+      preLoaderRoute: typeof AppAccountantDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/accountant/admission': {
+      id: '/_app/accountant/admission'
+      path: '/accountant/admission'
+      fullPath: '/accountant/admission'
+      preLoaderRoute: typeof AppAccountantAdmissionRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAccountantAdmissionRoute: typeof AppAccountantAdmissionRoute
+  AppAccountantDashboardRoute: typeof AppAccountantDashboardRoute
+  AppAccountantPaymentsRoute: typeof AppAccountantPaymentsRoute
   AppAdminAdmissionRoute: typeof AppAdminAdmissionRoute
   AppAdminAdsRoute: typeof AppAdminAdsRoute
   AppAdminCoursesRoute: typeof AppAdminCoursesRoute
@@ -364,9 +386,7 @@ interface AppRouteChildren {
   AppAdminLeadsRoute: typeof AppAdminLeadsRoute
   AppAdminReportsRoute: typeof AppAdminReportsRoute
   AppAdminUsersRoute: typeof AppAdminUsersRoute
-  AppCallerDashboardRoute: typeof AppCallerDashboardRoute
   AppCallerFollowUpRoute: typeof AppCallerFollowUpRoute
-  AppCallerLeadsRoute: typeof AppCallerLeadsRoute
   AppCounsellorAdmissionRoute: typeof AppCounsellorAdmissionRoute
   AppCounsellorDashboardRoute: typeof AppCounsellorDashboardRoute
   AppCounsellorFollowUpRoute: typeof AppCounsellorFollowUpRoute
@@ -374,6 +394,9 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAccountantAdmissionRoute: AppAccountantAdmissionRoute,
+  AppAccountantDashboardRoute: AppAccountantDashboardRoute,
+  AppAccountantPaymentsRoute: AppAccountantPaymentsRoute,
   AppAdminAdmissionRoute: AppAdminAdmissionRoute,
   AppAdminAdsRoute: AppAdminAdsRoute,
   AppAdminCoursesRoute: AppAdminCoursesRoute,
@@ -382,9 +405,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminLeadsRoute: AppAdminLeadsRoute,
   AppAdminReportsRoute: AppAdminReportsRoute,
   AppAdminUsersRoute: AppAdminUsersRoute,
-  AppCallerDashboardRoute: AppCallerDashboardRoute,
   AppCallerFollowUpRoute: AppCallerFollowUpRoute,
-  AppCallerLeadsRoute: AppCallerLeadsRoute,
   AppCounsellorAdmissionRoute: AppCounsellorAdmissionRoute,
   AppCounsellorDashboardRoute: AppCounsellorDashboardRoute,
   AppCounsellorFollowUpRoute: AppCounsellorFollowUpRoute,
@@ -400,13 +421,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
