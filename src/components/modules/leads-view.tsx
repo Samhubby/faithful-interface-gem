@@ -325,7 +325,7 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Clear All</Button>
           <Button onClick={submit}>{initial ? "Save changes" : "Create Lead Entry"}</Button>
         </div>
-        {(() => { void initial; return null; })()}
+        
       </DialogContent>
     </Dialog>
   );
