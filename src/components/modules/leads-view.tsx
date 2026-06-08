@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeader } from "@/components/page-header";
+import { LeadDetailsDialog } from "@/components/lead-details-dialog";
 
 import { useStore, store } from "@/lib/store";
 import { leadSchema, type LeadInput } from "@/lib/schemas";
@@ -45,6 +47,7 @@ export function LeadsView({ scopeToAssigned = false }: Props) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
+  const [viewing, setViewing] = useState<Lead | null>(null);
 
   const filtered = useMemo(() => {
     return all.filter((l) => {
@@ -129,10 +132,13 @@ export function LeadsView({ scopeToAssigned = false }: Props) {
                   </TableCell>
                   <TableCell className="text-xs">{assignee ? `${assignee.firstName}` : <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="icon" variant="ghost" onClick={() => { setEditing(l); setOpen(true); }}>
+                    <Button size="icon" variant="ghost" title="View" onClick={() => setViewing(l)}>
+                      <Eye className="h-4 w-4 text-accent" />
+                    </Button>
+                    <Button size="icon" variant="ghost" title="Edit" onClick={() => { setEditing(l); setOpen(true); }}>
                       <Pencil className="h-4 w-4 text-primary" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => { if (confirm("Delete lead?")) { store.removeLead(l.id); toast.success("Deleted"); } }}>
+                    <Button size="icon" variant="ghost" title="Delete" onClick={() => { if (confirm("Delete lead?")) { store.removeLead(l.id); toast.success("Deleted"); } }}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </TableCell>
@@ -150,6 +156,7 @@ export function LeadsView({ scopeToAssigned = false }: Props) {
       </div>
 
       <LeadDialog open={open} onOpenChange={setOpen} initial={editing} defaultSource={tab} />
+      <LeadDetailsDialog lead={viewing} onClose={() => setViewing(null)} />
     </div>
   );
 }
@@ -181,6 +188,9 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
     friend2Phone: initial?.friends?.[1]?.phone ?? "",
     friend3Name: initial?.friends?.[2]?.name ?? "",
     friend3Phone: initial?.friends?.[2]?.phone ?? "",
+    visitDate: initial?.visitDate ?? new Date().toISOString().slice(0, 10),
+    nextFollowUpDate: initial?.nextFollowUpDate ?? "",
+    remarks: initial?.remarks ?? "",
   }));
   const [assignedTo, setAssignedTo] = useState(initial?.assignedTo ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -217,6 +227,9 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
       status: d.status as Lead["status"],
       friends: friends.length ? friends : undefined,
       assignedTo: assignedTo || undefined,
+      visitDate: d.visitDate || undefined,
+      nextFollowUpDate: d.nextFollowUpDate || undefined,
+      remarks: d.remarks || undefined,
     };
     if (initial) { store.updateLead(initial.id, payload); toast.success("Lead updated"); }
     else { store.addLead(payload); toast.success("Lead created"); }
@@ -275,6 +288,25 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
             </Select>
           </Field>
         </div>
+
+        <SectionHeader title="Visit & Follow-up" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="Visit Date">
+            <Input type="date" value={form.visitDate ?? ""} onChange={(e) => setForm({ ...form, visitDate: e.target.value })} />
+          </Field>
+          <Field label="Next Follow Up Date">
+            <Input type="date" value={form.nextFollowUpDate ?? ""} onChange={(e) => setForm({ ...form, nextFollowUpDate: e.target.value })} />
+          </Field>
+          <Field label="Remarks" className="sm:col-span-2">
+            <Textarea
+              rows={3}
+              value={form.remarks ?? ""}
+              onChange={(e) => setForm({ ...form, remarks: e.target.value })}
+              placeholder="Original intent, what they asked about, key context..."
+            />
+          </Field>
+        </div>
+
 
         <SectionHeader title="Friends Also Interested" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

@@ -274,10 +274,11 @@ export const store = {
   listLeads: () => read().leads,
   addLead: (l: Omit<Lead, "id" | "createdAt">) => {
     const s = read();
-    const lead: Lead = { ...l, id: uid("L"), createdAt: new Date().toISOString() };
+    const lead: Lead = { ...l, id: uid("L"), createdAt: new Date().toISOString(), interactions: l.interactions ?? [] };
     s.leads.unshift(lead);
-    // automatically add to follow-ups if status warrants
-    if (["Follow-up Required", "CNR", "Will Revisit", "Will Visit College"].includes(lead.status)) {
+    // automatically add to follow-ups if status warrants OR a next follow-up date is set
+    const followUpStatuses: LeadStatus[] = ["Follow-up Required", "CNR", "Will Revisit", "Will Visit College"];
+    if (lead.nextFollowUpDate || followUpStatuses.includes(lead.status)) {
       s.followups.unshift({
         id: uid("F"),
         leadId: lead.id,
@@ -288,6 +289,8 @@ export const store = {
         maxAttempts: 5,
         lastStatus: lead.status,
         assignedTo: lead.assignedTo,
+        nextFollowUpDate: lead.nextFollowUpDate,
+        lastRemark: lead.remarks,
       });
     }
     write(s);
@@ -296,6 +299,17 @@ export const store = {
   updateLead: (id: string, patch: Partial<Lead>) => {
     const s = read();
     s.leads = s.leads.map((l) => (l.id === id ? { ...l, ...patch } : l));
+    // keep follow-up in sync when date / status changes
+    s.followups = s.followups.map((f) =>
+      f.leadId === id
+        ? {
+            ...f,
+            nextFollowUpDate: patch.nextFollowUpDate ?? f.nextFollowUpDate,
+            lastStatus: patch.status ?? f.lastStatus,
+            assignedTo: patch.assignedTo ?? f.assignedTo,
+          }
+        : f,
+    );
     write(s);
   },
   removeLead: (id: string) => {
@@ -306,8 +320,12 @@ export const store = {
   },
   // Follow-ups
   listFollowups: () => read().followups,
-  incrementAttempt: (id: string, newStatus?: LeadStatus) => {
+  incrementAttempt: (
+    id: string,
+    opts: { newStatus?: LeadStatus; nextFollowUpDate?: string; remarks?: string; by?: string } = {},
+  ) => {
     const s = read();
+    const { newStatus, nextFollowUpDate, remarks, by } = opts;
     s.followups = s.followups.map((f) =>
       f.id === id
         ? {
@@ -315,12 +333,32 @@ export const store = {
             attempts: Math.min(f.attempts + 1, f.maxAttempts),
             lastStatus: newStatus ?? f.lastStatus,
             lastContactedAt: new Date().toISOString(),
+            nextFollowUpDate: nextFollowUpDate ?? f.nextFollowUpDate,
+            lastRemark: remarks ?? f.lastRemark,
           }
         : f,
     );
-    if (newStatus) {
-      const fu = s.followups.find((f) => f.id === id);
-      if (fu) s.leads = s.leads.map((l) => (l.id === fu.leadId ? { ...l, status: newStatus } : l));
+    const fu = s.followups.find((f) => f.id === id);
+    if (fu) {
+      s.leads = s.leads.map((l) =>
+        l.id === fu.leadId
+          ? {
+              ...l,
+              status: newStatus ?? l.status,
+              nextFollowUpDate: nextFollowUpDate ?? l.nextFollowUpDate,
+              interactions: [
+                ...(l.interactions ?? []),
+                {
+                  at: new Date().toISOString(),
+                  status: (newStatus ?? l.status) as LeadStatus,
+                  remarks,
+                  nextFollowUpDate,
+                  by,
+                },
+              ],
+            }
+          : l,
+      );
     }
     write(s);
   },

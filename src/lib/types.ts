@@ -57,6 +57,14 @@ export interface Friend {
   phone: string;
 }
 
+export interface Interaction {
+  at: string; // ISO timestamp
+  status: LeadStatus;
+  remarks?: string;
+  nextFollowUpDate?: string; // ISO date (YYYY-MM-DD)
+  by?: string; // username
+}
+
 export interface Lead {
   id: string;
   fullName: string;
@@ -77,6 +85,11 @@ export interface Lead {
   assignedTo?: string; // username of caller/counsellor
   createdAt: string; // ISO date
   notes?: string;
+  // Visit & follow-up tracking
+  visitDate?: string; // YYYY-MM-DD
+  nextFollowUpDate?: string; // YYYY-MM-DD
+  remarks?: string; // original intent / first remark
+  interactions?: Interaction[]; // session log
 }
 
 export interface FollowUp {
@@ -90,6 +103,8 @@ export interface FollowUp {
   lastStatus?: LeadStatus;
   assignedTo?: string; // username
   lastContactedAt?: string;
+  nextFollowUpDate?: string; // YYYY-MM-DD — when this follow-up is due
+  lastRemark?: string;
 }
 
 export interface User {
