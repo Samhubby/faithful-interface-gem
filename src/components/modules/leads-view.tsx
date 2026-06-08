@@ -132,10 +132,13 @@ export function LeadsView({ scopeToAssigned = false }: Props) {
                   </TableCell>
                   <TableCell className="text-xs">{assignee ? `${assignee.firstName}` : <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="icon" variant="ghost" onClick={() => { setEditing(l); setOpen(true); }}>
+                    <Button size="icon" variant="ghost" title="View" onClick={() => setViewing(l)}>
+                      <Eye className="h-4 w-4 text-accent" />
+                    </Button>
+                    <Button size="icon" variant="ghost" title="Edit" onClick={() => { setEditing(l); setOpen(true); }}>
                       <Pencil className="h-4 w-4 text-primary" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => { if (confirm("Delete lead?")) { store.removeLead(l.id); toast.success("Deleted"); } }}>
+                    <Button size="icon" variant="ghost" title="Delete" onClick={() => { if (confirm("Delete lead?")) { store.removeLead(l.id); toast.success("Deleted"); } }}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </TableCell>
