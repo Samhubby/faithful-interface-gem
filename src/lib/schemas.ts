@@ -44,6 +44,9 @@ export const leadSchema = z.object({
   friend2Phone: z.string().trim().max(20).optional().or(z.literal("")),
   friend3Name: z.string().trim().max(60).optional().or(z.literal("")),
   friend3Phone: z.string().trim().max(20).optional().or(z.literal("")),
+  visitDate: z.string().trim().max(20).optional().or(z.literal("")),
+  nextFollowUpDate: z.string().trim().max(20).optional().or(z.literal("")),
+  remarks: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
 export const courseSchema = z.object({
