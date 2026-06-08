@@ -47,6 +47,7 @@ export function LeadsView({ scopeToAssigned = false }: Props) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
+  const [viewing, setViewing] = useState<Lead | null>(null);
 
   const filtered = useMemo(() => {
     return all.filter((l) => {
