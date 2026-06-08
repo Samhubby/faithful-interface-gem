@@ -227,6 +227,9 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
       status: d.status as Lead["status"],
       friends: friends.length ? friends : undefined,
       assignedTo: assignedTo || undefined,
+      visitDate: d.visitDate || undefined,
+      nextFollowUpDate: d.nextFollowUpDate || undefined,
+      remarks: d.remarks || undefined,
     };
     if (initial) { store.updateLead(initial.id, payload); toast.success("Lead updated"); }
     else { store.addLead(payload); toast.success("Lead created"); }
