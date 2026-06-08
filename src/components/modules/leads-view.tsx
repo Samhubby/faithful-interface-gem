@@ -188,6 +188,9 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
     friend2Phone: initial?.friends?.[1]?.phone ?? "",
     friend3Name: initial?.friends?.[2]?.name ?? "",
     friend3Phone: initial?.friends?.[2]?.phone ?? "",
+    visitDate: initial?.visitDate ?? new Date().toISOString().slice(0, 10),
+    nextFollowUpDate: initial?.nextFollowUpDate ?? "",
+    remarks: initial?.remarks ?? "",
   }));
   const [assignedTo, setAssignedTo] = useState(initial?.assignedTo ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
