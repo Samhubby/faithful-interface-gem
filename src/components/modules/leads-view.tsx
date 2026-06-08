@@ -289,6 +289,25 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
           </Field>
         </div>
 
+        <SectionHeader title="Visit & Follow-up" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="Visit Date">
+            <Input type="date" value={form.visitDate ?? ""} onChange={(e) => setForm({ ...form, visitDate: e.target.value })} />
+          </Field>
+          <Field label="Next Follow Up Date">
+            <Input type="date" value={form.nextFollowUpDate ?? ""} onChange={(e) => setForm({ ...form, nextFollowUpDate: e.target.value })} />
+          </Field>
+          <Field label="Remarks" className="sm:col-span-2">
+            <Textarea
+              rows={3}
+              value={form.remarks ?? ""}
+              onChange={(e) => setForm({ ...form, remarks: e.target.value })}
+              placeholder="Original intent, what they asked about, key context..."
+            />
+          </Field>
+        </div>
+
+
         <SectionHeader title="Friends Also Interested" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => (
