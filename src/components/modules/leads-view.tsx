@@ -156,6 +156,7 @@ export function LeadsView({ scopeToAssigned = false }: Props) {
       </div>
 
       <LeadDialog open={open} onOpenChange={setOpen} initial={editing} defaultSource={tab} />
+      <LeadDetailsDialog lead={viewing} onClose={() => setViewing(null)} />
     </div>
   );
 }
