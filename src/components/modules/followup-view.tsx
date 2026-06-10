@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { LeadDetailsDialog } from "@/components/lead-details-dialog";
+import { DatePicker } from "@/components/date-picker";
 import { useStore, store } from "@/lib/store";
 import { LEAD_STATUSES, type FollowUp, type Lead, type LeadStatus } from "@/lib/types";
 import { getSession } from "@/lib/session";
@@ -181,7 +182,7 @@ function UpdateInteractionDialog({ followup, onClose }: { followup: FollowUp | n
           </div>
           <div className="space-y-1.5">
             <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Next Follow Up Date</Label>
-            <Input type="date" value={nextDate} min={todayISO()} onChange={(e) => setNextDate(e.target.value)} />
+            <DatePicker value={nextDate} onChange={setNextDate} placeholder="Select next follow-up date" disablePast />
           </div>
           <div className="space-y-1.5">
             <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Session Remarks</Label>

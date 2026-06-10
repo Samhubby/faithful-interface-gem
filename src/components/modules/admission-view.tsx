@@ -114,6 +114,14 @@ export function AdmissionView({ readonly = false }: Props) {
   );
 }
 
+// Default total fee inferred from course name. Masters → 50,000, Bachelor's → 75,000.
+function feeForCourse(course: string): number {
+  const c = course.toLowerCase();
+  if (c.includes("master") || /\bm[a-z]{1,3}\b/.test(c)) return 50000;
+  if (c.includes("bachelor") || /\bb[a-z]{1,3}\b/.test(c)) return 75000;
+  return 0;
+}
+
 function defaultForm(): AdmissionInput {
   return {
     fullName: "",
@@ -257,7 +265,7 @@ function AdmissionDialog({ open, onOpenChange, initial }: { open: boolean; onOpe
             <SectionHeader title="Program Selection" />
             <div className="grid grid-cols-2 gap-3">
               <Field label="Course *" error={errors.course} className="col-span-2">
-                <Select value={form.course} onValueChange={(v) => setForm({ ...form, course: v })}>
+                <Select value={form.course} onValueChange={(v) => setForm({ ...form, course: v, totalFee: feeForCourse(v) })}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>{courses.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
