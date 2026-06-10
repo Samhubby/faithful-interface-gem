@@ -114,11 +114,11 @@ export function AdmissionView({ readonly = false }: Props) {
   );
 }
 
-// Default total fee inferred from course name keyword.
+// Default total fee inferred from course name. Masters → 50,000, Bachelor's → 75,000.
 function feeForCourse(course: string): number {
   const c = course.toLowerCase();
-  if (c.includes("master") || c.startsWith("m")) return 50000;
-  if (c.includes("bachelor") || c.startsWith("b")) return 75000;
+  if (c.includes("master") || /\bm[a-z]{1,3}\b/.test(c)) return 50000;
+  if (c.includes("bachelor") || /\bb[a-z]{1,3}\b/.test(c)) return 75000;
   return 0;
 }
 
