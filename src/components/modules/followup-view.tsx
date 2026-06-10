@@ -182,7 +182,7 @@ function UpdateInteractionDialog({ followup, onClose }: { followup: FollowUp | n
           </div>
           <div className="space-y-1.5">
             <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Next Follow Up Date</Label>
-            <Input type="date" value={nextDate} min={todayISO()} onChange={(e) => setNextDate(e.target.value)} />
+            <DatePicker value={nextDate} onChange={setNextDate} placeholder="Select next follow-up date" disablePast />
           </div>
           <div className="space-y-1.5">
             <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Session Remarks</Label>
