@@ -114,6 +114,14 @@ export function AdmissionView({ readonly = false }: Props) {
   );
 }
 
+// Default total fee inferred from course name keyword.
+function feeForCourse(course: string): number {
+  const c = course.toLowerCase();
+  if (c.includes("master") || c.startsWith("m")) return 50000;
+  if (c.includes("bachelor") || c.startsWith("b")) return 75000;
+  return 0;
+}
+
 function defaultForm(): AdmissionInput {
   return {
     fullName: "",
