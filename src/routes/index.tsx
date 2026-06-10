@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { Eye, EyeOff, ArrowRight, GraduationCap } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import pgsLogo from "@/assets/pgs-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,12 +66,8 @@ function LoginPage() {
           }}
         />
         <div className="relative flex items-center gap-3">
-          <div className="grid h-12 w-12 place-items-center rounded-xl bg-white/10 ring-1 ring-white/15 backdrop-blur">
-            <GraduationCap className="h-6 w-6 text-accent" />
-          </div>
-          <div className="leading-tight">
-            <div className="text-base font-semibold text-foreground">Presidential</div>
-            <div className="text-sm text-accent">Graduate School</div>
+          <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-white/20 shadow-lg">
+            <img src={pgsLogo.url} alt="Presidential Graduate School" className="h-10 w-auto object-contain" />
           </div>
         </div>
 

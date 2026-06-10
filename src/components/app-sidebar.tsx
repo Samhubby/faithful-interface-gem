@@ -12,6 +12,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import pgsLogo from "@/assets/pgs-logo.png.asset.json";
 import {
   Sidebar,
   SidebarContent,
@@ -69,16 +70,15 @@ export function AppSidebar({ session }: { session: Session }) {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 ring-1 ring-primary/30">
-            <GraduationCap className="h-5 w-5 text-accent" />
-          </div>
+        <div className="flex items-center gap-2 px-2 py-3">
+          <img
+            src={pgsLogo.url}
+            alt="Presidential Graduate School"
+            className={collapsed ? "h-9 w-9 object-contain" : "h-10 w-auto object-contain"}
+          />
           {!collapsed && (
-            <div className="leading-tight">
-              <div className="font-display text-sm font-semibold">PGS · LMS</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                {ROLE_LABEL[session.role]}
-              </div>
+            <div className="ml-auto text-[10px] uppercase tracking-widest text-muted-foreground">
+              {ROLE_LABEL[session.role]}
             </div>
           )}
         </div>
