@@ -257,7 +257,7 @@ function AdmissionDialog({ open, onOpenChange, initial }: { open: boolean; onOpe
             <SectionHeader title="Program Selection" />
             <div className="grid grid-cols-2 gap-3">
               <Field label="Course *" error={errors.course} className="col-span-2">
-                <Select value={form.course} onValueChange={(v) => setForm({ ...form, course: v })}>
+                <Select value={form.course} onValueChange={(v) => setForm({ ...form, course: v, totalFee: feeForCourse(v) })}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>{courses.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
