@@ -293,10 +293,10 @@ function LeadDialog({ open, onOpenChange, initial, defaultSource }: { open: bool
         <SectionHeader title="Visit & Follow-up" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Visit Date">
-            <Input type="date" value={form.visitDate ?? ""} onChange={(e) => setForm({ ...form, visitDate: e.target.value })} />
+            <DatePicker value={form.visitDate ?? ""} onChange={(v) => setForm({ ...form, visitDate: v })} placeholder="Select visit date" />
           </Field>
           <Field label="Next Follow Up Date">
-            <Input type="date" value={form.nextFollowUpDate ?? ""} onChange={(e) => setForm({ ...form, nextFollowUpDate: e.target.value })} />
+            <DatePicker value={form.nextFollowUpDate ?? ""} onChange={(v) => setForm({ ...form, nextFollowUpDate: v })} placeholder="Select next follow-up date" disablePast />
           </Field>
           <Field label="Remarks" className="sm:col-span-2">
             <Textarea
