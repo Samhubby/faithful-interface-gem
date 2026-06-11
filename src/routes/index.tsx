@@ -1,14 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import pgsLogo from "@/assets/pgs-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROLE_HOME, setSession } from "@/lib/session";
-import { store } from "@/lib/store";
-import { loginSchema } from "@/lib/schemas";
+import { ROLE_HOME, cacheSession } from "@/lib/session";
+import { getCurrentSession, signInWithUsername } from "@/lib/auth";
+import { bootstrapAdmin, userCount } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,32 +27,49 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [needsBootstrap, setNeedsBootstrap] = useState(false);
+  const [bootstrapOpen, setBootstrapOpen] = useState(false);
 
-  function onSubmit(e: FormEvent) {
+  const checkCount = useServerFn(userCount);
+  const doBootstrap = useServerFn(bootstrapAdmin);
+
+  // If already signed in, jump straight to the role home.
+  useEffect(() => {
+    (async () => {
+      const s = await getCurrentSession();
+      if (s) {
+        cacheSession(s);
+        navigate({ to: ROLE_HOME[s.role] });
+        return;
+      }
+      try {
+        const { count } = await checkCount();
+        setNeedsBootstrap(count === 0);
+      } catch {
+        /* ignore */
+      }
+    })();
+  }, [navigate, checkCount]);
+
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    const parsed = loginSchema.safeParse({ username, password });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+    if (!username || !password) {
+      toast.error("Enter username and password");
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await signInWithUsername(username, password);
+      const s = await getCurrentSession();
+      if (!s) throw new Error("Account has no role assigned. Contact an admin.");
+      cacheSession(s);
+      toast.success(`Welcome, ${s.displayName}`);
+      navigate({ to: ROLE_HOME[s.role] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Sign in failed");
+    } finally {
       setLoading(false);
-      const u = store
-        .listUsers()
-        .find((x) => x.username.toLowerCase() === username.trim().toLowerCase());
-      if (!u || u.password !== password) {
-        toast.error("Invalid credentials");
-        return;
-      }
-      setSession({
-        username: u.username,
-        displayName: `${u.firstName} ${u.lastName}`.trim(),
-        role: u.role,
-      });
-      toast.success(`Welcome, ${u.firstName}`);
-      navigate({ to: ROLE_HOME[u.role] });
-    }, 250);
+    }
   }
 
   return (
@@ -98,7 +116,7 @@ function LoginPage() {
           <form onSubmit={onSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="username" className="text-xs uppercase tracking-wider text-muted-foreground">
-                Staff username
+                Username or email
               </Label>
               <Input
                 id="username"
@@ -112,7 +130,7 @@ function LoginPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">
-                Secret key
+                Password
               </Label>
               <div className="relative">
                 <Input
@@ -141,16 +159,89 @@ function LoginPage() {
             </Button>
           </form>
 
+          {needsBootstrap && (
+            <div className="mt-6 rounded-lg border border-accent/40 bg-accent/5 p-4 text-sm">
+              <div className="font-semibold text-foreground mb-1">First-time setup</div>
+              <p className="text-muted-foreground mb-3">
+                No admin account exists yet. Create the first administrator to get started.
+              </p>
+              {!bootstrapOpen ? (
+                <Button variant="outline" size="sm" onClick={() => setBootstrapOpen(true)}>
+                  Create first admin
+                </Button>
+              ) : (
+                <BootstrapForm
+                  onCreate={async (vals) => {
+                    setLoading(true);
+                    try {
+                      await doBootstrap({ data: vals });
+                      toast.success("Admin created. Signing you in…");
+                      await signInWithUsername(vals.email, vals.password);
+                      const s = await getCurrentSession();
+                      if (s) {
+                        cacheSession(s);
+                        navigate({ to: ROLE_HOME[s.role] });
+                      }
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Bootstrap failed");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  loading={loading}
+                />
+              )}
+            </div>
+          )}
+
           <div className="mt-6 border-t border-border pt-4 text-center text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
             Presidential Graduate School · Internal Network
-          </div>
-
-          <div className="mt-6 rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground space-y-1">
-            <div className="font-semibold text-foreground">Demo accounts</div>
-            <div>admin / admin · muktinath / muktinath · dikshyant / dikshyant · bishnu / bishnu</div>
           </div>
         </div>
       </section>
     </main>
+  );
+}
+
+function BootstrapForm({
+  onCreate,
+  loading,
+}: {
+  onCreate: (v: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    password: string;
+  }) => void;
+  loading: boolean;
+}) {
+  const [firstName, setFirstName] = useState("System");
+  const [lastName, setLastName] = useState("Admin");
+  const [username, setUsername] = useState("admin");
+  const [email, setEmail] = useState("admin@pgs.edu.np");
+  const [password, setPassword] = useState("");
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+        <Input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+      </div>
+      <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+      <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Input
+        placeholder="Password (min 6 chars)"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <Button
+        size="sm"
+        disabled={loading || password.length < 6}
+        onClick={() => onCreate({ firstName, lastName, username, email, password })}
+      >
+        {loading ? "Creating…" : "Create admin"}
+      </Button>
+    </div>
   );
 }

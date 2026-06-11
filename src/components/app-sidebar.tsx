@@ -26,7 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ROLE_LABEL, type Role, type Session } from "@/lib/session";
+import { ROLE_LABEL, cacheSession, type Role, type Session } from "@/lib/session";
 import { getCurrentSession, signOut } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 
