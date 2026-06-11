@@ -137,12 +137,14 @@ export function useSessionGuard() {
         return;
       }
       setSessionState(s);
+      cacheSession(s);
       setChecked(true);
     }
     load();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         setSessionState(null);
+        cacheSession(null);
         navigate({ to: "/" });
       }
     });
