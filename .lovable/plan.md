@@ -1,75 +1,66 @@
 ## Goal
-Keep my current visual design (Ocean Deep + Space Grotesk + sidebar shell) but rebuild the **features, role-based access, modules, forms, and validations** to match the original Facet LMS exactly.
+Turn the current localStorage prototype into a real multi-user LMS backed by Lovable Cloud (Postgres + Auth), so any user you create can log in from any device and see only the features for their role.
 
-## Major gaps to fix
+## What changes
 
-### 1. Roles — 4 roles, not 3
-Original has: **Management** (admin), **Counsellor**, **Caller**, **Accountant**. I'm missing Accountant entirely.
+### 1. Backend (Lovable Cloud)
+Enable Lovable Cloud and create these tables with RLS:
+- `profiles` — id (=auth.users.id), first_name, last_name, username, email
+- `user_roles` — (user_id, role) where role ∈ admin | counsellor | caller | accountant (separate table, security-definer `has_role()` for safe RLS)
+- `courses` — id, name
+- `ad_sources` — id, name
+- `leads` — all current Lead fields incl. `next_follow_up_date`, `remarks`, `status`, `assigned_to` (uuid → profiles), `created_at`
+- `lead_interactions` — lead_id, at, status, remarks, next_follow_up_date, by
+- `followups` — lead_id, attempts, max_attempts (5), last_status, next_follow_up_date, assigned_to, last_remark
+- `admissions` — full admission record incl. `total_fee`, `amount_paid`, `payment_status`
 
-### 2. Role-based navigation (must restrict exactly)
-| Role | Nav items |
-|---|---|
-| Management | Dashboard · Users · Courses · Ads · Leads · Follow Up · Admission · Reports |
-| Counsellor | Dashboard · Leads · Follow Up · Admission |
-| Caller | **Follow Up only** (mine wrongly shows Dashboard + Leads) |
-| Accountant | TBD — needs confirmation (likely Admission + payments view) |
+RLS:
+- Admin: full access to everything
+- Counsellor / Caller: read+write leads/followups/admissions assigned to them; read courses & ad_sources
+- Accountant: read all admissions, update payment fields only
+- Everyone authenticated: read courses, ad_sources, their own profile
 
-### 3. Leads module — tabbed by source
-Original has 5 tabs: **Walk-in · Incoming · Website · AD · Event/Outreach**. Each tab is its own filtered list. Mine is one flat list.
+Triggers:
+- On `auth.users` insert → create `profiles` row
+- On `leads` insert/update: if `status='Admitted'` and no admission exists yet → auto-create an `admissions` row with `total_fee` defaulted from course name (B* → 75 000, M* → 50 000)
+- On `leads` insert/update: if `next_follow_up_date` set or status is a follow-up status → upsert into `followups`
 
-### 4. Lead status vocabulary (14 values)
-Replace my 5 statuses with: Dead, Interested, Expensive Fee, Incoming Call Blocked, CNR, Not Interested, Joined Another College, Will Revisit, Will Visit College, Follow-up Required, Want Detail in WhatsApp, Admitted, Will Apply for Next Intake, CSV Upload.
+### 2. Auth
+- Replace the current fake login (`localStorage` session) with real Supabase email/password auth
+- Login page: email + password (we'll seed existing demo users into auth so nothing breaks)
+- "Add user" in the Users module calls a protected server function that uses the admin client to create the auth user + profile + role in one go — so any user you create can immediately log in
+- Route guard: send unauthenticated visitors to `/auth`; load role from `user_roles` and redirect to that role's home
 
-### 5. Lead Registration form
-Required fields: Full Name, Gender, Email, Phone, Address, Alternate Phone, Qualification (+2/Bachelors), Institution, GPA, Interested Course, Friends 1/2/3 (name & number), Marketing Ads source.
+### 3. Follow-up Today
+- Follow-up dashboard gets a **"Due Today"** tab (default) that filters by `next_follow_up_date = today`, plus **Upcoming** and **Overdue** tabs
+- Creating a walk-in lead with today's follow-up date will show up there immediately
 
-### 6. User Registration form
-First Name, Last Name, Username, System Role (4 options), Email, Password, Confirm Password (match validation).
+### 4. Admitted → Admission
+- Marking a lead "Admitted" (from Leads or Follow-up) auto-creates the admission record server-side via trigger, so it appears in the Admission module without manual re-entry
+- Default `total_fee`:
+  - Course name starts with `B` (case-insensitive) → 75 000
+  - Course name starts with `M` → 50 000
+  - else → leave blank
+- Fee remains editable
 
-### 7. Courses module
-Simple list (just Course Name) with Add / Edit / Delete. Seed with the 10 real programs: BBA, BSAI, BScIT, BSCS, BSSWE, MBA, MBA-Data Analytics, MBA-Finance & Economics, MBA-IT, MScIT.
+### 5. Walk-in lead form
+- Already has remarks + calendar next-follow-up (kept), but the date will now persist server-side
 
-### 8. Ads (Marketing Sources)
-Simple list of ad source names with CRUD. Seed: AI Chatbox, College Nepal, EduSanjal, Facebook, Hoarding Board, Instagram, NPL, Others, Pole Branding, TikTok.
+## Technical notes
+- All data access goes through TanStack `createServerFn` with `requireSupabaseAuth` (RLS as the signed-in user). Admin-only mutations (create user, role assignment) verify `has_role(uid, 'admin')` before using the service-role client.
+- Existing `store.ts` / `useStore` calls are replaced with TanStack Query hooks talking to server functions. The UI components stay largely the same.
+- One migration creates all tables + GRANTs + RLS + triggers + seed data (courses, ad sources).
+- Demo users from the current seed will be created in auth so you can keep logging in as `admin / admin`, `muktinath / muktinath`, etc. (email will be `<username>@pgs.edu.np`, password unchanged).
 
-### 9. Follow Up module
-Columns: Name · Number · Attempts (x/5 badge) · Type (EVENT/OUTREACH etc.). Caller sees only their assigned subset; admin/counsellor see all. Includes search + status filter.
+## Out of scope for this pass
+- Email notifications, password reset UI (can add later)
+- File uploads for admission documents (checkbox stays boolean for now)
+- Realtime updates (data will refresh on navigation / refetch)
 
-### 10. Admission module — large multi-section form
-Sections: Personal Identity (Name*, Gender*, DOB, Marital) · Contact & Address (Phone*, Alt Phone, Email*, Permanent Address*, Temporary) · Family (Father, Mother) · Academic Records table (SLC/+2/Bachelors × Institution/Board/Faculty/Year/GPA) · Professional Background (Occupation, Company, Years Exp) · Program Selection (Course*, Intake, Previously Applied + Year, Admission Status) · Scholarship & Referral (Type*, Declared, Amount, Source, Referral Name/Phone) · Mandatory Checklist (9 checkboxes: Photo, Citizenship, Transcript, Provisional, Character Certificate, Migration, Diploma, Equivalency, Supporting Docs) · Document Uploads (4 file slots: Provisional Cert, Transcript, Citizenship/ID, Additional) · Remarks. Plus a **Download CSV** action on the list.
+## A couple of confirmations before I build
 
-### 11. Reports → Daily Walk-In Report
-Stats cards (Today's Visitors, Counselling Done, Today's Admissions, Intake Walk-ins, Intake Admissions) · Course-wise Performance Breakdown table (Visitors/Counselling/Admissions per course) · Counsellor Productivity panel · Report Distribution (configured email recipients chips).
+1. **Demo logins** — OK to migrate the existing seeded users into real auth using `<username>@pgs.edu.np` + the same password (e.g. `admin@pgs.edu.np` / `admin`)? Or do you want a clean slate with just one admin you set?
+2. **Credentials you mentioned** — you don't need to share anything; Lovable Cloud will provision the database automatically. If you meant SMTP/email for password resets, we can wire that later.
+3. **Fee rule** — "starts with B → 75 000, starts with M → 50 000" applied to the course name. Confirm that's the rule (so `BBA`, `BScIT`, `BSCS` = 75k; `MBA`, `MScIT`, `MBA-IT` = 50k).
 
-### 12. Dashboard tweaks
-Header reads "ADMISSION ANALYTICS (SUMMER 6) — Admission Dashboard · Live". Counsellor sees the same dashboard. Caller has no dashboard at all.
-
-### 13. Validations (Zod schemas, client + form-level)
-- Login: required username + required password
-- User: email format, password ≥ 8 chars, confirm-match, username unique, role in enum
-- Lead: name 1–100, phone digits 7–15, email optional but format-checked, GPA 0–4 (or %), at least course required
-- Course / Ad Source: name 1–80, unique
-- Admission: all `*` fields required, file uploads PDF/IMG only and ≤ 5 MB each, mandatory-checklist items count toward "Document Pending"
-
-### 14. Persistence
-Keep current mock-data store for now (localStorage-backed) so all CRUD actions feel real without enabling Cloud yet. Add Cloud later in a separate pass if you want real auth + database.
-
-## Build approach (single pass)
-
-1. **Roles + nav** — add Accountant, fix Caller to only Follow Up, update session enum and sidebar map.
-2. **Local store** — extend `mock-data.ts` into a small localStorage-backed store with typed CRUD (users, courses, ads, leads, followups, admissions) so every screen does real reads/writes.
-3. **Zod schemas** — one `src/lib/schemas.ts` for all forms.
-4. **Leads** — rewrite with 5 source tabs, 14 statuses, full Lead Registration dialog, status-change action per row.
-5. **Users** — registration dialog with 4 roles + password confirm.
-6. **Courses & Ads** — simple CRUD lists, seeded with real values.
-7. **Follow Up** — attempts counter (x/5), type column, status filter, caller scoping.
-8. **Admission** — full multi-section form + Download CSV.
-9. **Reports → Daily Walk-In Report** — stat cards + course breakdown + email recipients.
-10. **Dashboard** — match the exact stat tiles and copy.
-11. **Counsellor + Caller** workspaces re-pointed to the shared modules with restricted nav.
-
-## Open questions (need your call)
-1. **Accountant role** — I couldn't log in as accountant. What screens should they see? (Best guess: Admission list + payments/fees module — but original has no fees module visible to me.)
-2. **Lead detail / status update UX** — in the original, clicking a row didn't open anything for me. Should each row have an inline status dropdown + "Assign to Counsellor/Caller" + "Add Follow-Up" buttons?
-3. **Branding footer** — original shows "powered by Facet Technology pvt ltd". Do you want that retained, replaced with your own org, or removed?
-4. **Persistence** — OK to keep mock localStorage store for now, or should I enable Lovable Cloud (real DB + auth) in the same pass?
+Once you confirm, I'll enable Lovable Cloud and ship the migration + server functions + UI rewire in one go.
