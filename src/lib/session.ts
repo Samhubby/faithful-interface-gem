@@ -1,20 +1,17 @@
-export type Role = "admin" | "counsellor" | "caller" | "accountant";
+// Re-exports for backwards compatibility + sync-readable cached session.
+// The real source of truth is `@/lib/auth` (Supabase). We mirror the resolved
+// session into localStorage so legacy synchronous callers (modules that filter
+// "assigned to me") can keep working until they are migrated to server-driven data.
+export { ROLE_LABEL, ROLE_HOME, type Role, type Session, signOut } from "./auth";
+import type { Session } from "./auth";
 
-// Display labels (original uses "Management" for admin).
-export const ROLE_LABEL: Record<Role, string> = {
-  admin: "Management",
-  counsellor: "Counsellor",
-  caller: "Caller",
-  accountant: "Accountant",
-};
+const KEY = "lms_session_cache_v1";
 
-export interface Session {
-  username: string;
-  displayName: string;
-  role: Role;
+export function cacheSession(s: Session | null) {
+  if (typeof window === "undefined") return;
+  if (s) localStorage.setItem(KEY, JSON.stringify(s));
+  else localStorage.removeItem(KEY);
 }
-
-const KEY = "lms_session";
 
 export function getSession(): Session | null {
   if (typeof window === "undefined") return null;
@@ -25,18 +22,3 @@ export function getSession(): Session | null {
     return null;
   }
 }
-
-export function setSession(s: Session) {
-  localStorage.setItem(KEY, JSON.stringify(s));
-}
-
-export function clearSession() {
-  localStorage.removeItem(KEY);
-}
-
-export const ROLE_HOME: Record<Role, string> = {
-  admin: "/admin/dashboard",
-  counsellor: "/counsellor/dashboard",
-  caller: "/caller/follow-up",
-  accountant: "/accountant/dashboard",
-};

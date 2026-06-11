@@ -26,7 +26,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { clearSession, getSession, ROLE_LABEL, type Role, type Session } from "@/lib/session";
+import { ROLE_LABEL, cacheSession, type Role, type Session } from "@/lib/session";
+import { getCurrentSession, signOut } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 type Item = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -62,8 +64,8 @@ export function AppSidebar({ session }: { session: Session }) {
   const navigate = useNavigate();
   const items = NAV[session.role];
 
-  function logout() {
-    clearSession();
+  async function logout() {
+    await signOut();
     navigate({ to: "/" });
   }
 
@@ -123,13 +125,35 @@ export function AppSidebar({ session }: { session: Session }) {
 export function useSessionGuard() {
   const navigate = useNavigate();
   const [session, setSessionState] = useState<Session | null>(null);
+  const [checked, setChecked] = useState(false);
   useEffect(() => {
-    const s = getSession();
-    if (!s) {
-      navigate({ to: "/" });
-      return;
+    let mounted = true;
+    async function load() {
+      const s = await getCurrentSession();
+      if (!mounted) return;
+      if (!s) {
+        navigate({ to: "/" });
+        setChecked(true);
+        return;
+      }
+      setSessionState(s);
+      cacheSession(s);
+      setChecked(true);
     }
-    setSessionState(s);
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setSessionState(null);
+        cacheSession(null);
+        navigate({ to: "/" });
+      }
+    });
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
+  // Returning null while checking shows a brief loader instead of bouncing to /
+  void checked;
   return session;
 }
